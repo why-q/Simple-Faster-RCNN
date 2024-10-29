@@ -14,6 +14,8 @@
     ...
 4. 加深对 Numpy 矩阵运算的理解，尤其广播机制。
 
+[TOC]
+
 ## 环境准备
 
 推荐使用 Conda 进行环境管理。
@@ -40,9 +42,9 @@ Faster R-CNN 的结构可以分为三个部分：
 - Region Proposal Network：自动生成 ROIs（通过一系列卷积层）
 - ROIHead：对 RPN 提供的 RoIs 进行分类和边界框回归，得到最终的检测结果（通过一系列全连接层）
 
-![](./imgs/Faster%20R-CNN.png)
+<img src="./imgs/Faster%20R-CNN.png" style="zoom:33%;" />
 
-![](./imgs/model_all.png)
+<img src="./imgs/model_all.png" style="zoom:33%;" />
 
 ## 实验
 
@@ -50,7 +52,7 @@ Faster R-CNN 的结构可以分为三个部分：
 
 #### 1.1 IoU ⭐
 
-![](./imgs/IoU.jpg)
+<img src="./imgs/IoU.jpg" style="zoom:33%;" />
 
 IoU 的计算函数位于 `model/utils/bbox_tools.py` 中，函数 `bbox_iou(bbox_a, bbox_b)`，请根据提示以及注释中提供的示例补全缺失部分的代码。
 
@@ -188,7 +190,7 @@ Anchor 是 Faster R-CNN 一个大创新点，使用 Anchor 可以在特征图上
 
 ##### 2.3.2 预测分支 ⭐
 
-![](./imgs/RPN%20Predict.png)
+<img src="./imgs/RPN%20Predict.png" style="zoom:33%;" />
 
 在输入 RPN 的预测分支之前，特征图首先通过卷积层提取特征（这个卷积层通常是一个 3×3 的卷积层，输出通道数是 256 或者 512），然后通过两个并行的 1x1 卷积层分别预测前景/背景分类和边界框回归。其中，分类分支输出的通道数为 2 × n_anchor，表示每个 anchor 的前景和背景概率；回归分支输出的通道数为 4 × n_anchor，表示每个 anchor 相对于 ground truth 的偏移量（dx, dy, dw, dh）。
 
@@ -243,7 +245,7 @@ ROIPool 会将不同大小的 ROI 区域池化为固定大小的特征图。具�
 
 相关代码位于 `model/faster_rcnn_vgg16.py, class VGG16RoIHead` 函数 `forward` 中。一个分支预测多分类，一个分支预测边界框回归。其中，分类分支输出的通道数为类别数量（包括背景类），回归分支输出的通道数为 `n_class × 4`。请根据提示补全关于预测分支的代码。
 
-## 3 How to create ground true labels and calculate loss? (10min)
+### 3 How to create ground true labels and calculate loss? (10min)
 
 Faster R-CNN 总共包含四个损失：
 
@@ -260,7 +262,7 @@ Faster R-CNN 总共包含四个损失：
 
 更加细节的架构图如下：
 
-![](./imgs/Detailed%20Faster%20R-CNN%20Architecture.png)
+<img src="./imgs/Detailed%20Faster%20R-CNN%20Architecture.png" style="zoom:33%;" />
 
 该部分代码位于 `trainer.py` 函数 `forward` 中。
 
@@ -269,7 +271,7 @@ Faster R-CNN 总共包含四个损失：
 - `model/utils/creator_tool.py, class ProposalTargetCreator` func: `__call__` 补全关于如何确定正负样本的代码行。
 - `trainer.py, class FasterRCNNTrainer` func: `forward` 补全所有损失函数计算的缺失部分。
 
-### 3.1 ROIHead Loss ⭐
+#### 3.1 ROIHead Loss ⭐
 
 ROIHead 的损失是比较好计算的，我们只需要 Ground Truth 的 BBox 和 Class Labels 即可，损失计算如下：
 
@@ -280,7 +282,7 @@ ROIHead 的损失是比较好计算的，我们只需要 Ground Truth 的 BBox �
 
 相关代码位于 `model/utils/creator_tool.py, class AnchorTargetCreator` 函数 `_create_label` 中，请根据上述过程补充缺失代码。
 
-### 3.2 RPN Loss ⭐
+#### 3.2 RPN Loss ⭐
 
 RPN 的损失计算就涉及了一个问题，如何生成 GT Labels？具体而言，我们需要为每个 Anchor 生成两类标签：
 
@@ -307,7 +309,7 @@ RPN 的损失计算就涉及了一个问题，如何生成 GT Labels？具体而
 
 相关代码位于 `model/utils/creator_tool.py, class ProposalTargetCreator` 函数 `__call__` ，请根据上述过程补充缺失代码。
 
-### 3.3 Total Loss ⭐
+#### 3.3 Total Loss ⭐
 
 在了解了 ROIHead Loss 和 RPN Loss 的计算方式后，我们可以总结一下整个 Faster R-CNN 的损失计算过程：
 
@@ -332,7 +334,7 @@ $L = L_{rpn\_cls} + L_{rpn\_loc} + L_{roi\_cls} + L_{roi\_loc}$
 
 相关代码位于 `trainer.py, class FasterRCNNTrainer` 函数 `forward` 中，请补全缺失代码。
 
-## 4 Prepare Dataset (5min)
+### 4 Prepare Dataset (5min) ⭐
 
 数据集下载：
 - [百度网盘](https://pan.baidu.com/s/1casvnVrItKtksQe96nVA5Q?pwd=s5ee)
@@ -342,7 +344,7 @@ $L = L_{rpn\_cls} + L_{rpn\_loc} + L_{roi\_cls} + L_{roi\_loc}$
 - `data/voc_dataset.py, class VOCBboxDataset` func: `get_example` 无需补全，但请阅读该函数，确保掌握数据处理流程。
 - `data/dataset.py, class Dataset` 根据 `class TestDataset` 补全代码。
 
-## 5 Train! (25min)
+### 5 Train! (25min) ⭐
 
 任务汇总：
 - `model/faster_rcnn.py, class FasterRCNN` func: `forward, _suppress` 请阅读以上函数并确保理解其处理流程。
