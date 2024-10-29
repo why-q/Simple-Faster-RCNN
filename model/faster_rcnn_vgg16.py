@@ -3,10 +3,8 @@ from __future__ import absolute_import
 import torch as t
 from torch import nn
 from torchvision.models import vgg16
-from torchvision.ops import RoIPool
 
 from model.faster_rcnn import FasterRCNN
-from model.region_proposal_network import RegionProposalNetwork
 from utils import array_tool as at
 
 
@@ -17,7 +15,6 @@ def decom_vgg16():
     # NOTE  Only use the first 30 layers of the model,
     # `features` is a list of layers.
     # features = ...
-    features = list(model.features)[:30]
 
     # Classifier will be used in `VGG16RoIHead`
     classifier = model.classifier
@@ -34,10 +31,8 @@ def decom_vgg16():
         for p in layer.parameters():
             p.requires_grad = False
 
-    # NOTE  Return a Sequential of layers and
-    # a Sequential of classifier layers.
+    # NOTE  Return a Sequential of layers and a Sequential of classifier layers.
     # return ...
-    return nn.Sequential(*features), classifier
 
 
 class FasterRCNNVGG16(FasterRCNN):
@@ -60,26 +55,12 @@ class FasterRCNNVGG16(FasterRCNN):
     def __init__(self, n_fg_class=20, ratios=[0.5, 1, 2], anchor_scales=[8, 16, 32]):
         # NOTE  Decompose VGG16 model
         # extractor, classifier = ...
-        extractor, classifier = decom_vgg16()
 
         # NOTE  Init RPN and Head
         # rpn = RegionProposalNetwork(...)
-        rpn = RegionProposalNetwork(
-            512,
-            512,
-            ratios=ratios,
-            anchor_scales=anchor_scales,
-            feat_stride=self.feat_stride,
-        )
 
         # NOTE  Init RoIHead
         # head = VGG16RoIHead(...)
-        head = VGG16RoIHead(
-            n_class=n_fg_class + 1,
-            roi_size=7,
-            spatial_scale=(1.0 / self.feat_stride),
-            classifier=classifier,
-        )
 
         super(FasterRCNNVGG16, self).__init__(
             extractor,
@@ -110,13 +91,11 @@ class VGG16RoIHead(nn.Module):
 
         # NOTE  Init linear layer to get the class location.
         # 4096 -> n_class * 4
-        # self.cls_loc = ...
-        self.cls_loc = nn.Linear(4096, n_class * 4)
+        # self.cls_loc = nn.Linear(...)
 
         # NOTE  Init linear layer to get the class score.
         # 4096 -> n_class
-        # self.score = ...
-        self.score = nn.Linear(4096, n_class)
+        # self.score = nn.Linear(...)
 
         normal_init(self.cls_loc, 0, 0.001)
         normal_init(self.score, 0, 0.01)
@@ -127,8 +106,7 @@ class VGG16RoIHead(nn.Module):
 
         # NOTE  Init ROIPool
         # Att: `roi_size, spatial_scale` are parameters of `RoIPool.__init__`
-        # self.roi = ...
-        self.roi = RoIPool((self.roi_size, self.roi_size), self.spatial_scale)
+        # self.roi = ROIPool(...)
 
     def forward(self, x, rois, roi_indices):
         """Forward the chain.
@@ -156,19 +134,16 @@ class VGG16RoIHead(nn.Module):
         indices_and_rois = xy_indices_and_rois.contiguous()
 
         # NOTE  Apply RoIPool
-        # pool = ...
-        pool = self.roi(x, indices_and_rois)
+        # pool = self.roi(...)
+
         # Flatten the output of the RoIPool layer,
         # so that it can be fed into the classifier.
         pool = pool.view(pool.size(0), -1)
 
         # NOTE  Apply the classifier and predict the class and location.
         # fc7 = ...
-        fc7 = self.classifier(pool)
         # roi_cls_locs = ...
-        roi_cls_locs = self.cls_loc(fc7)
         # roi_scores = ...
-        roi_scores = self.score(fc7)
 
         return roi_cls_locs, roi_scores
 

@@ -73,10 +73,6 @@ def loc2bbox(src_bbox, loc):
     # ctr_x = ...
     # h = ...
     # w = ...
-    ctr_y = dy * src_height[:, None] + src_ctr_y[:, None]
-    ctr_x = dx * src_width[:, None] + src_ctr_x[:, None]
-    h = np.enp(dh) * src_height[:, None]
-    w = np.enp(dw) * src_width[:, None]
 
     # Trans to (y_min, x_min, y_max, x_max)
     dst_bbox = np.zeros(loc.shape, dtype=loc.dtype)
@@ -266,7 +262,6 @@ def bbox_iou(bbox_a, bbox_b):
 
     # NOTE  IoU = area_i / (area_a + area_b - area_i), use broadcasting to calculate.
     # return ...
-    return area_i / (area_a[:, None] + area_b - area_i)
 
 
 def __test():
@@ -330,8 +325,6 @@ def generate_anchor_base(base_size=16, ratios=[0.5, 1, 2], anchor_scales=[8, 16,
             # NOTE  b: base_size, s: anchor_scales[j], r: ratios[i]
             # h = ...
             # w = ...
-            h = base_size * anchor_scales[j] * np.sqrt(ratios[i])
-            w = base_size * anchor_scales[j] * np.sqrt(1.0 / ratios[i])
 
             index = i * len(anchor_scales) + j
 

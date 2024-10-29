@@ -139,16 +139,10 @@ class FasterRCNNTrainer(nn.Module):
         gt_rpn_loc = at.totensor(gt_rpn_loc)
 
         # NOTE  Use `_fast_rcnn_loc_loss` to calculate the localization loss.
-        # rpn_loc_loss = ...
-        rpn_loc_loss = _fast_rcnn_loc_loss(
-            rpn_loc, gt_rpn_loc, gt_rpn_label.data, self.rpn_sigma
-        )
+        # rpn_loc_loss = _fast_rcnn_loc_loss(...)
 
         # NOTE  Use `F.cross_entropy` to calculate the classification loss.
-        # rpn_cls_loss = ...
-        rpn_cls_loss = F.cross_entropy(
-            rpn_score, gt_rpn_label.to(device), ignore_index=-1
-        )
+        # rpn_cls_loss = F.cross_entropy(...)
 
         _gt_rpn_label = gt_rpn_label[gt_rpn_label > -1]
         _rpn_score = at.tonumpy(rpn_score)[at.tonumpy(gt_rpn_label) > -1]
@@ -172,8 +166,6 @@ class FasterRCNNTrainer(nn.Module):
 
         # NOTE  Calculate all losses.
         # losses += ...
-        losses = [rpn_loc_loss, rpn_cls_loss, roi_loc_loss, roi_cls_loss]
-        losses = losses + [sum(losses)]
 
         return LossTuple(*losses)
 
@@ -185,10 +177,6 @@ class FasterRCNNTrainer(nn.Module):
         # losses = self.forward(...)
         # losses.total_loss.backward()
         # self.optimizer ... (step)
-        self.optimizer.zero_grad()
-        losses = self.forward(imgs, bboxes, labels, scale)
-        losses.total_loss.backward()
-        self.optimizer.step()
 
         # Update the dict of meters, log the loss
         self.update_meters(losses)

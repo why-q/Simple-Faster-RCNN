@@ -62,26 +62,17 @@ class RegionProposalNetwork(nn.Module):
         # NOTE  `self.conv1` is used to extract features from the input feature map.
         # Use a 3x3 convolution with stride 1 and padding 1.
         # Att: `mid_channels` is a parameter defined in `__init__`.
-        # self.conv1 = ...
-        self.conv1 = nn.Conv2d(
-            in_channels, mid_channels, 3, 1, 1
-        )  # Normally, in_channels == mid_channels
+        # self.conv1 = nn.Conv2d(...)
 
         # NOTE  `self.score` is used to predict
         # the foreground/background score of each anchor.
         # Use a 1x1 convolution to predict.
-        # self.score = ...
-        self.score = nn.Conv2d(
-            mid_channels, n_anchor * 2, 1, 1, 0
-        )  # [N, C, H, W] -> [N, 2 * A, H, W], A is the number of anchors (A=9)
+        # self.score = nn.Conv2d(...)
 
         # NOTE  `self.loc` is used to predict
         # the bounding box regression of each anchor.
         # Use a 1x1 convolution to predict.
-        # self.loc = ...
-        self.loc = nn.Conv2d(
-            mid_channels, n_anchor * 4, 1, 1, 0
-        )  # [N, C, H, W] -> [N, 4 * A, H, W], A is the number of anchors (In our case, A=9)
+        # self.loc = nn.Conv2d(...)
 
         normal_init(self.conv1, 0, 0.01)
         normal_init(self.score, 0, 0.01)
@@ -263,9 +254,6 @@ def _enumerate_shifted_anchor(anchor_base, feat_stride, height, width):
     # NOTE  anchor_base: [A, 4], shift: [K, 4] -> [KA, 4]
     # We use broadcasting to add the shift to the anchor_base.
     # anchor = ...
-    anchor = anchor_base.reshape((1, A, 4)) + shift.reshape((1, K, 4)).transpose(
-        (1, 0, 2)
-    )  # -> [K, A, 4]
 
     # Reshape anchor to [K*A, 4]
     anchor = anchor.reshape((K * A, 4)).astype(np.float32)  # [K*A, 4]

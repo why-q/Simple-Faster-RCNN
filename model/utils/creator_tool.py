@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-from torchvision.ops import nms
 
 from model.utils.bbox_tools import bbox2loc, bbox_iou, loc2bbox
 
@@ -114,8 +113,8 @@ class ProposalTargetCreator(object):
         # NOTE  Select foreground RoIs as those with >= self.pos_iou_thresh IoU.
         # `np.where` returns a tuple of array, for example:
         # `np.where(max_iou >= thresh)` returns `(array([0, 1, 2, 3]),)`
-        # pos_index = ...
-        pos_index = np.where(max_iou >= self.pos_iou_thresh)[0]
+        # pos_index = np.where(...)
+
         pos_roi_per_this_image = int(min(pos_roi_per_image, pos_index.size))
         if pos_index.size > 0:
             pos_index = np.random.choice(
@@ -124,10 +123,8 @@ class ProposalTargetCreator(object):
 
         # NOTE  Select background RoIs as those within
         # [self.neg_iou_thresh_lo, self.neg_iou_thresh_hi).
-        # neg_index = ...
-        neg_index = np.where(
-            (max_iou < self.neg_iou_thresh_hi) & (max_iou >= self.neg_iou_thresh_lo)
-        )[0]
+        # neg_index = np.where(...)
+
         neg_roi_per_this_image = self.n_sample - pos_roi_per_this_image
         neg_roi_per_this_image = int(min(neg_roi_per_this_image, neg_index.size))
         if neg_index.size > 0:
@@ -240,15 +237,12 @@ class AnchorTargetCreator(object):
 
         # NOTE  Assign negative labels first so that positive labels can clobber them
         # label[...] = ...
-        label[max_ious < self.neg_iou_thresh] = 0
 
         # NOTE  Rule 2: for each gt, anchor with highest iou gets positive label.
-        label[...] = ...
-        label[gt_argmax_ious] = 1
+        # label[...] = ...
 
         # NOTE  Get positive labels for anchors with IoU >= self.pos_iou_thresh.
         # label[...] = ...
-        label[max_ious >= self.pos_iou_thresh] = 1
 
         # subsample positive labels if we have too many
         n_pos = int(self.pos_ratio * self.n_sample)
@@ -448,11 +442,6 @@ class ProposalCreator(object):
 
         # NOTE  Apply NMS
         # keep = nms(...)
-        keep = nms(
-            torch.from_numpy(roi).to(device),
-            torch.from_numpy(score).to(device),
-            self.nms_thresh,
-        )
 
         if n_post_nms > 0:
             keep = keep[:n_post_nms]
