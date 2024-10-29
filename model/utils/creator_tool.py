@@ -243,7 +243,7 @@ class AnchorTargetCreator(object):
         label[max_ious < self.neg_iou_thresh] = 0
 
         # NOTE  Rule 2: for each gt, anchor with highest iou gets positive label.
-        label[...] = ...
+        # label[...] = ...
         label[gt_argmax_ious] = 1
 
         # NOTE  Get positive labels for anchors with IoU >= self.pos_iou_thresh.
